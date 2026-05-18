@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (username.length < 3 || password.length < 4) {
-        throw Exception("Invalid input constraints on server-side evaluation.");
+        throw Exception("Invalid input constraints.");
       }
 
       String hashedPassword = _hashPassword(password);
@@ -86,8 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _showSnackBar('❌ Invalid username or password!', Colors.redAccent);
       }
     } catch (e) {
-      print("Error during database/auth operation: $e");
-      _showSnackBar('❌ Connection failure or server constraints rejected the request.', Colors.red);
+      print("Error: $e");
+      _showSnackBar('❌ Login request rejected by server constraints.', Colors.red);
     } finally {
       setState(() { _isLoggingIn = false; });
     }
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Center(
         child: Container(
-          maxWidth: 400,
+          constraints: const BoxConstraints(maxWidth: 400), //  التعديل الصحيح هنا
           padding: const EdgeInsets.all(24.0),
           margin: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
@@ -176,7 +176,7 @@ class _TaskHomeScreenState extends State<TaskHomeScreen> {
 
     try {
       if (taskText.length > 100) {
-        throw Exception("Payload too large for database server infrastructure.");
+        throw Exception("Payload too large.");
       }
 
       await _tasksCollection.add({
@@ -188,8 +188,8 @@ class _TaskHomeScreenState extends State<TaskHomeScreen> {
       _taskController.clear();
       _showSnackBar('✅ Task saved to cloud successfully!', Colors.green);
     } catch (e) {
-      print("Database Write Error: $e");
-      _showSnackBar('❌ Friendly Error: We couldn\'t save your task due to a database connection timeout.', Colors.red);
+      print("Database Error: $e");
+      _showSnackBar('❌ Connection timeout. Try again.', Colors.red);
     } finally {
       setState(() { _isLoading = false; });
     }
@@ -200,7 +200,7 @@ class _TaskHomeScreenState extends State<TaskHomeScreen> {
       await _tasksCollection.doc(docId).delete();
       _showSnackBar('🗑️ Task removed.', Colors.grey[800]!);
     } catch (e) {
-      _showSnackBar('❌ Failed to delete task from server.', Colors.red);
+      _showSnackBar('❌ Failed to delete task.', Colors.red);
     }
   }
 
@@ -264,7 +264,7 @@ class _TaskHomeScreenState extends State<TaskHomeScreen> {
               stream: _tasksCollection.orderBy('createdAt', descending: true).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(child: Text('Database integration error: ${snapshot.error}'));
+                  return Center(child: Text('Database error: ${snapshot.error}'));
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator(color: Colors.purple));
